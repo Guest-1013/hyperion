@@ -14,13 +14,17 @@ impl GameState {
         clear_background(BLACK);
         let screen_width = screen_width();
     
-        let mut l_str = String::new();
-        let mut vx0_str = String::new();
-        let mut vy0_str = String::new();
-        let mut x0_str = String::new();
-        let mut y0_str = String::new();
-        let mut omega0_str = String::new();
-        let mut theta0_str = String::new();
+        // 使用线程局部存储来保持输入内容
+        use std::cell::RefCell;
+        thread_local! {
+            static L_STR: RefCell<String> = RefCell::new(String::from("0.01"));
+            static VX0_STR: RefCell<String> = RefCell::new(String::from("0.0"));
+            static VY0_STR: RefCell<String> = RefCell::new(String::from("6.5"));
+            static X0_STR: RefCell<String> = RefCell::new(String::from("1.35"));
+            static Y0_STR: RefCell<String> = RefCell::new(String::from("0.0"));
+            static OMEGA0_STR: RefCell<String> = RefCell::new(String::from("0.5"));
+            static THETA0_STR: RefCell<String> = RefCell::new(String::from("0.0"));
+        }
     
         let mut start_clicked = false;
         
@@ -28,19 +32,19 @@ impl GameState {
             ui.label(None, "Init Settings");
             ui.separator();
             ui.label(None, "L:");
-            InputText::new(hash!("L")).ui(ui, &mut l_str);
+            L_STR.with(|s| InputText::new(hash!("L")).ui(ui, &mut *s.borrow_mut()));
             ui.label(None, "vx0:");
-            InputText::new(hash!("vx0")).ui(ui, &mut vx0_str);
+            VX0_STR.with(|s| InputText::new(hash!("vx0")).ui(ui, &mut *s.borrow_mut()));
             ui.label(None, "vy0:");
-            InputText::new(hash!("vy0")).ui(ui, &mut vy0_str);
+            VY0_STR.with(|s| InputText::new(hash!("vy0")).ui(ui, &mut *s.borrow_mut()));
             ui.label(None, "x0:");
-            InputText::new(hash!("x0")).ui(ui, &mut x0_str);
+            X0_STR.with(|s| InputText::new(hash!("x0")).ui(ui, &mut *s.borrow_mut()));
             ui.label(None, "y0:");
-            InputText::new(hash!("y0")).ui(ui, &mut y0_str);
+            Y0_STR.with(|s| InputText::new(hash!("y0")).ui(ui, &mut *s.borrow_mut()));
             ui.label(None, "omega0:");
-            InputText::new(hash!("omega0")).ui(ui, &mut omega0_str);
+            OMEGA0_STR.with(|s| InputText::new(hash!("omega0")).ui(ui, &mut *s.borrow_mut()));
             ui.label(None, "theta0:");
-            InputText::new(hash!("theta0")).ui(ui, &mut theta0_str);
+            THETA0_STR.with(|s| InputText::new(hash!("theta0")).ui(ui, &mut *s.borrow_mut()));
             ui.separator();
             if ui.button(None, "Start Simulation") {
                 start_clicked = true;
@@ -51,13 +55,13 @@ impl GameState {
         if start_clicked {
             *self = GameState::Animation;
             Hyperion::new(
-                l_str.parse().unwrap_or(0.01),
-                vx0_str.parse().unwrap_or(0.0),
-                vy0_str.parse().unwrap_or(6.5),
-                x0_str.parse().unwrap_or(1.35),
-                y0_str.parse().unwrap_or(0.0),
-                omega0_str.parse().unwrap_or(0.5),
-                theta0_str.parse().unwrap_or(0.0)
+                L_STR.with(|s| s.borrow().parse().unwrap_or(0.01)),
+                VX0_STR.with(|s| s.borrow().parse().unwrap_or(0.0)),
+                VY0_STR.with(|s| s.borrow().parse().unwrap_or(6.5)),
+                X0_STR.with(|s| s.borrow().parse().unwrap_or(1.35)),
+                Y0_STR.with(|s| s.borrow().parse().unwrap_or(0.0)),
+                OMEGA0_STR.with(|s| s.borrow().parse().unwrap_or(0.5)),
+                THETA0_STR.with(|s| s.borrow().parse().unwrap_or(0.0))
             )
         } else {
             Hyperion::new(0.01, 0.0, 6.5, 13.27, 0.0, 0.5, 0.)
