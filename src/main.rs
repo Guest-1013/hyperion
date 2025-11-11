@@ -21,6 +21,7 @@ async fn main() {
                 init_state = game_state.menu().await;
                 states = HyperionStates{states: vec![init_state.clone()]};
             }
+			
             GameState::Animation => {
                 if !is_e_output {
                     let e = (1. - states.states.last().unwrap().vy.powf(2.) * states.states.last().unwrap().x / (4.*PI.powf(2.))).abs();
